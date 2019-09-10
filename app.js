@@ -13,6 +13,12 @@ app.get('/', async function (req, res, next){
     let response = await rp(options)
     let deckId = response.deck_id
     console.log(deckId)
+    let drawOptions = {
+      url: `https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=5`,
+      json: true
+    }
+    let drawResponse = await rp(drawOptions)
+    console.log(drawResponse)
   } catch (error) {
     console.log('there is a problem getting all cards', error)
   }
