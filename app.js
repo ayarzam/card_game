@@ -3,6 +3,50 @@ const request = require('request')
 const rp = require('request-promise')
 const app = express()
 
+
+/*
+* Converts facecards into numbers for sorting.
+* @param {Int} value | The name of the current facecard.
+* @return {Int} | New value to be assigned for the facecard.
+*/
+function convertStringToNumber(value) {
+  switch (value) {
+    case 'ACE':
+      return 14;
+    case 'KING':
+      return 13;
+    case 'QUEEN':
+      return 12;
+    case 'JACK':
+      return 11;
+    default:
+      return;
+  }
+}
+
+/*
+* Sorts the cards in descending order.
+* @param {Object} a | One card from the current.
+* @param {Object} b | Another card from the current.
+* @return {Int} comparison | Value (negative, zero, positive) used to determine sorting order for the cards.
+*/
+function sortCards (a, b) {
+	let comparison = 0;
+	let reg = /^\d+$/;
+
+	let valueA = (reg.test(a.value)) ? parseInt(a.value, 10) : convertStringToNumber(a.value);
+	let valueB = (reg.test(b.value)) ? parseInt(b.value, 10) : convertStringToNumber(b.value);
+
+    if (valueA <= valueB) {
+        comparison = 1;
+    }
+	  else if (valueA >= valueB) {
+        comparison = -1;
+    }
+    return comparison;
+}
+
+
 app.get('/', async function (req, res, next){
   let holder = []
   console.log('getting all cards')
@@ -26,6 +70,9 @@ app.get('/', async function (req, res, next){
         suit: card.suit
       })
     })
+
+    holder.sort(sortCards)
+    console.log('holder sort', holder)
     if (holder[0].suit === holder[1].suit === holder[2].suit === holder[3].suit === holder[4].suit){
       console.log('flush')
     // } else if(){
