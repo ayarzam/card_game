@@ -49,6 +49,7 @@ function sortCards (a, b) {
 
 app.get('/', async function (req, res, next){
   let holder = []
+  let cardCounter = {}
   console.log('getting all cards')
   let options = {
     url: 'https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1',
@@ -57,13 +58,13 @@ app.get('/', async function (req, res, next){
   try {
     let response = await rp(options)
     let deckId = response.deck_id
-    console.log(deckId)
+    // console.log(deckId)
     let drawOptions = {
       url: `https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=5`,
       json: true
     }
     let drawResponse = await rp(drawOptions)
-    console.log(drawResponse)
+    // console.log(drawResponse)
     drawResponse.cards.map(card => {
       holder.push({
         value: card.value,
@@ -71,20 +72,55 @@ app.get('/', async function (req, res, next){
       })
     })
 
-    holder.sort(sortCards)
-    console.log('holder sort', holder)
-    if (holder[0].suit === holder[1].suit === holder[2].suit === holder[3].suit === holder[4].suit){
-      console.log('flush')
-    // } else if(){
-
-    } else if (holder[0].value !== holder[1].value !== holder[2].value !== holder[3].value !== holder[4].value){
-      console.log('No Pair')
+    holder.sort(sortCards);
+    console.log(holder)
+    holder.forEach(newCard => {
+      cardCounter[newCard.value] = cardCounter[newCard.value] ? cardCounter[newCard.value] + 1 : 1
+    })
+    console.log(cardCounter)
+    let cardObject = []
+    for (let key in cardCounter){
+      cardObject.push({
+        cardValue: key,
+        cardCount: cardCounter[key]
+      })
     }
-    // console.log(holder[0].value, holder[0].suit)
-    // console.log(holder[1].value, holder[1].suit)
-    // console.log(holder[2].value, holder[2].suit)
-    // console.log(holder[3].value, holder[3].suit)
-    // console.log(holder[4].value, holder[4].suit)
+    // if (cardObject.cardCount <= 1){
+    //   console.log("nopair")
+    // }
+    console.log(cardObject)
+    for (let i = 0; i  < cardObject.length; i++){
+      console.log(cardObject[i].cardCount)
+      if (cardObject[i].cardCount === 1){
+        console.log('no pair')
+      } else if (cardObject[i].cardCount === 2){
+        console.log('One pair')
+      } else if (cardObject[i].cardCount === 3){
+        console.log('three of a kind')
+      } else if (cardObject[i].cardCount === 4){
+        console.log('four of a kind')
+      }
+    }
+    // console.log("sorted holder", holder);
+
+    // for (let i = 0; i < holder.length; i++) {
+    //   for (let j = i + 1; j < holder.length; j++) {
+    //     if (holder[i].value !== holder[j].value) {
+    //       console.log("in the if statement");
+    //     }
+    //   }
+    // }
+    // console.log("no pair");
+
+    
+    // console.log('holder sort', holder)
+    // if (holder[0].suit === holder[1].suit === holder[2].suit === holder[3].suit === holder[4].suit){
+    //   console.log('flush')
+    // // } else if(){
+
+    // } else if (holder[0].value !== holder[1].value !== holder[2].value !== holder[3].value !== holder[4].value){
+    //   console.log('No Pair')
+    // }
   } catch (error) {
     console.log('there is a problem getting all cards', error)
   }
