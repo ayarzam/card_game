@@ -45,11 +45,26 @@ function sortCards (a, b) {
     }
     return comparison;
 }
+function countCards (array) {
+  let cardCounter = {};
+  array.forEach(newCard => {
+    cardCounter[newCard.value] = cardCounter[newCard.value] ? cardCounter[newCard.value] + 1 : 1
+  })
+
+  // console.log('cardCounter ', cardCounter)
+  // array.forEach(newCard => {
+  //   newCard.count = cardCounter[newCard.value];
+  // })
+  // console.log('array ', array);
+  // return array;
+
+  return cardCounter;
+}
 
 
 app.get('/', async function (req, res, next){
   let holder = []
-  let cardCounter = {}
+
   console.log('getting all cards')
   let options = {
     url: 'https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1',
@@ -73,19 +88,94 @@ app.get('/', async function (req, res, next){
     })
 
     holder.sort(sortCards);
-    console.log(holder)
-    holder.forEach(newCard => {
-      cardCounter[newCard.value] = cardCounter[newCard.value] ? cardCounter[newCard.value] + 1 : 1
-    })
-    console.log(cardCounter)
 
-    let cardObject = []
-    for (let key in cardCounter){
-      cardObject.push({
-        cardValue: key,
-        cardCount: cardCounter[key]
-      })
+    console.log(holder)
+
+    //holder = countCards(holder);
+
+    // Check for pairs (One Pair, Two Pairs, Three of a Kind, or Four of Kind)
+    // Three of a kind with One Pair (Full House)
+    // No Pairs (High Card)
+    let pairedCards = countCards(holder);
+    let pairFound = false;
+    let possibleTwoPairs = false;
+    let onePair = false;
+    let threeOfAKind = false;
+    let highCard = true;
+    console.log('paired cards', pairedCards);
+    Object.keys(pairedCards).forEach( key => {
+      switch (pairedCards[key]) {
+        case 2:
+          console.log('One Pair');
+          if (onePair && threeOfAKind) {
+            console.log('Full House');
+          }
+          if (possibleTwoPairs) {
+            console.log('Two Pair')
+            highCard = false;
+          }
+          pairFound = true;
+          onePair = true;
+          highCard = false;
+          break;
+        case 3:
+          console.log('Three of a Kind');
+          if (onePair && threeOfAKind) {
+            console.log('Full House');
+          }
+          if (possibleTwoPairs) {
+            console.log('Two Pair')
+            highCard = false;
+          }
+          pairFound = true;
+          threeOfAKind = true;
+          highCard = false;
+          break;
+        case 4:
+          console.log('Four of a Kind');
+          if (possibleTwoPairs) {
+            console.log('Two Pair')
+            highCard = false;
+          }
+          pairFound = true;
+          highCard = false;
+          break;
+        default:
+          break;
+      }
+      if (pairFound) {
+        possibleTwoPairs = true;
+      }
+    })
+    if (highCard === true) {
+      console.log('High Card')
     }
+    // // Check for decreasing sequential values (Straight)
+    // if (sequentialValues(holder)) {
+    //   console.log('Straight')
+    // }
+
+    // // All of same suit (Flush)
+    // if (sameSuit(holder)) {
+    //   console.log('Flush')
+    // }
+
+    // // Same Suit and Sequential (Straight Flush)
+    // if (sameSuit(holder) && sequentialValues(holder)) {
+    //   console.log('Straight Flush')
+    // }
+
+    // console.log('object keys: ', Object.keys(cardCounter))
+    // console.log('object value: ', Object.values(cardCounter))
+
+    // let cardObject = []
+    // for (let key in cardCounter){
+    //   // console.log('key', key)
+    //   cardObject.push({
+    //     cardValue: key,
+    //     cardCount: cardCounter[key]
+    //   })
+    // }
     // if (cardObject[0].cardCount === 1){
     //   console.log("No pair")
     // } else if (cardObject[0].cardCount === 2){
@@ -95,7 +185,8 @@ app.get('/', async function (req, res, next){
     // } else if (cardObject[0].cardCount === 4){
     //   console.log("Four of a kind")
     // }
-    console.log(cardObject)
+    // console.log('1', cardObject)
+
     
     // for (let i = 0; i  < cardObject.length; i++){
     //   console.log(cardObject[i].cardCount)
