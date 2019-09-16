@@ -78,6 +78,7 @@ app.get('/', async function (req, res, next){
       cardCounter[newCard.value] = cardCounter[newCard.value] ? cardCounter[newCard.value] + 1 : 1
     })
     console.log(cardCounter)
+
     let cardObject = []
     for (let key in cardCounter){
       cardObject.push({
@@ -85,22 +86,29 @@ app.get('/', async function (req, res, next){
         cardCount: cardCounter[key]
       })
     }
-    // if (cardObject.cardCount <= 1){
-    //   console.log("nopair")
+    // if (cardObject[0].cardCount === 1){
+    //   console.log("No pair")
+    // } else if (cardObject[0].cardCount === 2){
+    //   console.log("One pair")
+    // } else if (cardObject[0].cardCount === 3){
+    //   console.log("Three of a kind")
+    // } else if (cardObject[0].cardCount === 4){
+    //   console.log("Four of a kind")
     // }
     console.log(cardObject)
-    for (let i = 0; i  < cardObject.length; i++){
-      console.log(cardObject[i].cardCount)
-      if (cardObject[i].cardCount === 1){
-        console.log('no pair')
-      } else if (cardObject[i].cardCount === 2){
-        console.log('One pair')
-      } else if (cardObject[i].cardCount === 3){
-        console.log('three of a kind')
-      } else if (cardObject[i].cardCount === 4){
-        console.log('four of a kind')
-      }
-    }
+    
+    // for (let i = 0; i  < cardObject.length; i++){
+    //   console.log(cardObject[i].cardCount)
+    //   if (cardObject[i].cardCount === 1){
+    //     console.log('no pair')
+    //   } else if (cardObject[i].cardCount === 2){
+    //     console.log('One pair')
+    //   } else if (cardObject[i].cardCount === 3){
+    //     console.log('three of a kind')
+    //   } else if (cardObject[i].cardCount === 4){
+    //     console.log('four of a kind')
+    //   }
+    // }
     // console.log("sorted holder", holder);
 
     // for (let i = 0; i < holder.length; i++) {
