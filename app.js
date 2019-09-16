@@ -45,6 +45,7 @@ function sortCards (a, b) {
     }
     return comparison;
 }
+
 function countCards (array) {
   let cardCounter = {};
   array.forEach(newCard => {
@@ -59,6 +60,56 @@ function countCards (array) {
   // return array;
 
   return cardCounter;
+}
+
+function pairsBasedOnNumber(array) {
+  let pairsFound = {
+    onePair: false,
+    twoPairs: false,
+    threeOfAKind: false,
+    fourOfAKind: false
+  };
+
+  Object.keys(array).forEach( key => {
+    switch (array[key]) {
+      case 2:
+        if (pairsFound.onePair) { //Two one pairs have been found
+          pairsFound.twoPairs = true;
+        }
+        else {
+          pairsFound.onePair = true; // One Pair
+        }
+        break;
+      case 3:
+        pairsFound.threeOfAKind = true; // Three of a Kind
+        break;
+      case 4:
+        pairsFound.fourOfAKind = true; // Four of a Kind
+        break;
+      default:
+        break;
+    }
+  })
+  let pairs = Object.values(pairsFound).filter(value => value === true);
+  if (pairsFound.onePair && pairsFound.threeOfAKind) {
+    console.log('Full House');
+  }
+  else if (pairsFound.onePair) {
+    console.log('One Pair');
+  }
+  else if (pairsFound.TwoPairs || pairs.length === 2) { // Two Pairs
+    pairsFound.twoPairs = true;
+    console.log('Two Pairs');
+  }
+  else if (pairsFound.threeOfAKind) {
+    console.log('Three of a Kind');
+  }
+  else if (pairsFound.fourOfAKind) {
+    console.log('Four of a Kind');
+  }
+  else if (!Object.values(pairsFound).includes(true)) { // No Pairs
+    console.log('High Card');
+  }
 }
 
 
@@ -96,60 +147,9 @@ app.get('/', async function (req, res, next){
     // Check for pairs (One Pair, Two Pairs, Three of a Kind, or Four of Kind)
     // Three of a kind with One Pair (Full House)
     // No Pairs (High Card)
-    let pairedCards = countCards(holder);
-    let pairFound = false;
-    let possibleTwoPairs = false;
-    let onePair = false;
-    let threeOfAKind = false;
-    let highCard = true;
-    console.log('paired cards', pairedCards);
-    Object.keys(pairedCards).forEach( key => {
-      switch (pairedCards[key]) {
-        case 2:
-          console.log('One Pair');
-          if (onePair && threeOfAKind) {
-            console.log('Full House');
-          }
-          if (possibleTwoPairs) {
-            console.log('Two Pair')
-            highCard = false;
-          }
-          pairFound = true;
-          onePair = true;
-          highCard = false;
-          break;
-        case 3:
-          console.log('Three of a Kind');
-          if (onePair && threeOfAKind) {
-            console.log('Full House');
-          }
-          if (possibleTwoPairs) {
-            console.log('Two Pair')
-            highCard = false;
-          }
-          pairFound = true;
-          threeOfAKind = true;
-          highCard = false;
-          break;
-        case 4:
-          console.log('Four of a Kind');
-          if (possibleTwoPairs) {
-            console.log('Two Pair')
-            highCard = false;
-          }
-          pairFound = true;
-          highCard = false;
-          break;
-        default:
-          break;
-      }
-      if (pairFound) {
-        possibleTwoPairs = true;
-      }
-    })
-    if (highCard === true) {
-      console.log('High Card')
-    }
+    pairsBasedOnNumber(countCards(holder));
+    console.log('paired Cards', countCards(holder));
+    
     // // Check for decreasing sequential values (Straight)
     // if (sequentialValues(holder)) {
     //   console.log('Straight')
