@@ -46,10 +46,17 @@ function sortCards (a, b) {
     return comparison;
 }
 
-function countCards (array) {
+function countCards (array, val) {
   let cardCounter = {};
   array.forEach(newCard => {
-    cardCounter[newCard.value] = cardCounter[newCard.value] ? cardCounter[newCard.value] + 1 : 1
+    switch (val) {
+      case 'suit':
+        cardCounter[newCard.suit] = cardCounter[newCard.suit] ? cardCounter[newCard.suit] + 1 : 1;
+        break;
+      default:
+        cardCounter[newCard.value] = cardCounter[newCard.value] ? cardCounter[newCard.value] + 1 : 1;
+        break;
+    }
   })
 
   // console.log('cardCounter ', cardCounter)
@@ -90,28 +97,65 @@ function pairsBasedOnNumber(array) {
         break;
     }
   })
-  let pairs = Object.values(pairsFound).filter(value => value === true);
-  if (pairsFound.onePair && pairsFound.threeOfAKind) {
-    console.log('Full House');
-  }
-  else if (pairsFound.onePair) {
-    console.log('One Pair');
-  }
-  else if (pairsFound.TwoPairs || pairs.length === 2) { // Two Pairs
-    pairsFound.twoPairs = true;
-    console.log('Two Pairs');
-  }
-  else if (pairsFound.threeOfAKind) {
-    console.log('Three of a Kind');
-  }
-  else if (pairsFound.fourOfAKind) {
-    console.log('Four of a Kind');
-  }
-  else if (!Object.values(pairsFound).includes(true)) { // No Pairs
-    console.log('High Card');
-  }
+  return pairsFound;
 }
 
+function sequentialValues(array) {
+  let counter = 0;
+  let reg = /^\d+$/;
+
+  for (let i = 0; i < array.length; i++) {
+    let value = (reg.test(array[i].value)) ? parseInt(array[i].value, 10) : convertStringToNumber(array[i].value);
+    if (counter === 0) {
+      counter = value;
+    }
+    else if (value === (counter - 1)) {
+      counter = value;
+    }
+    else {
+      return false;
+    }
+  }
+  return true;
+}
+
+function checkPokerHand(array) {
+  let pairsFound = pairsBasedOnNumber(countCards(array, "value"));
+  let suitFound = countCards(array, "suit");
+  let pairs = Object.values(pairsFound).filter(value => value === true);
+
+  if (pairsFound.onePair && pairsFound.threeOfAKind) {
+    //  Three of a kind with One Pair (Full House)
+    console.log("Full House");
+  } else if (pairsFound.TwoPairs || pairs.length === 2) {
+    // Two Pairs
+    pairsFound.twoPairs = true;
+    console.log("Two Pairs");
+  } else if (pairsFound.onePair) {
+    // One Pair
+    console.log("One Pair");
+  } else if (pairsFound.threeOfAKind) {
+    // Three of a Kind
+    console.log("Three of a Kind");
+  } else if (pairsFound.fourOfAKind) {
+    // Four of a Kind
+    console.log("Four of a Kind");
+  } else if (!Object.values(pairsFound).includes(true)) {
+    // No Pairs
+    console.log("High Card");
+  } else if (Object.values(suitFound).includes(5) && sequentialValues(array)) {
+    // Same Suit and Sequential (Straight Flush)
+    console.log("Straight Flush");
+  } else if (sequentialValues(array)) {
+    // Check for decreasing sequential values (Straight)
+    console.log("Straight");
+  } else if (Object.values(suitFound).includes(5)) {
+    // All of same suit (Flush)
+    console.log("Flush");
+  } else {
+    console.log("No Pairs Found");
+  }
+}
 
 app.get('/', async function (req, res, next){
   let holder = []
@@ -141,85 +185,11 @@ app.get('/', async function (req, res, next){
     holder.sort(sortCards);
 
     console.log(holder)
+    console.log('paired Cards: ', countCards(holder, 'value'));
+    console.log('paired suit: ', countCards(holder, 'suit'))
 
-    //holder = countCards(holder);
+    checkPokerHand(holder);
 
-    // Check for pairs (One Pair, Two Pairs, Three of a Kind, or Four of Kind)
-    // Three of a kind with One Pair (Full House)
-    // No Pairs (High Card)
-    pairsBasedOnNumber(countCards(holder));
-    console.log('paired Cards', countCards(holder));
-    
-    // // Check for decreasing sequential values (Straight)
-    // if (sequentialValues(holder)) {
-    //   console.log('Straight')
-    // }
-
-    // // All of same suit (Flush)
-    // if (sameSuit(holder)) {
-    //   console.log('Flush')
-    // }
-
-    // // Same Suit and Sequential (Straight Flush)
-    // if (sameSuit(holder) && sequentialValues(holder)) {
-    //   console.log('Straight Flush')
-    // }
-
-    // console.log('object keys: ', Object.keys(cardCounter))
-    // console.log('object value: ', Object.values(cardCounter))
-
-    // let cardObject = []
-    // for (let key in cardCounter){
-    //   // console.log('key', key)
-    //   cardObject.push({
-    //     cardValue: key,
-    //     cardCount: cardCounter[key]
-    //   })
-    // }
-    // if (cardObject[0].cardCount === 1){
-    //   console.log("No pair")
-    // } else if (cardObject[0].cardCount === 2){
-    //   console.log("One pair")
-    // } else if (cardObject[0].cardCount === 3){
-    //   console.log("Three of a kind")
-    // } else if (cardObject[0].cardCount === 4){
-    //   console.log("Four of a kind")
-    // }
-    // console.log('1', cardObject)
-
-    
-    // for (let i = 0; i  < cardObject.length; i++){
-    //   console.log(cardObject[i].cardCount)
-    //   if (cardObject[i].cardCount === 1){
-    //     console.log('no pair')
-    //   } else if (cardObject[i].cardCount === 2){
-    //     console.log('One pair')
-    //   } else if (cardObject[i].cardCount === 3){
-    //     console.log('three of a kind')
-    //   } else if (cardObject[i].cardCount === 4){
-    //     console.log('four of a kind')
-    //   }
-    // }
-    // console.log("sorted holder", holder);
-
-    // for (let i = 0; i < holder.length; i++) {
-    //   for (let j = i + 1; j < holder.length; j++) {
-    //     if (holder[i].value !== holder[j].value) {
-    //       console.log("in the if statement");
-    //     }
-    //   }
-    // }
-    // console.log("no pair");
-
-    
-    // console.log('holder sort', holder)
-    // if (holder[0].suit === holder[1].suit === holder[2].suit === holder[3].suit === holder[4].suit){
-    //   console.log('flush')
-    // // } else if(){
-
-    // } else if (holder[0].value !== holder[1].value !== holder[2].value !== holder[3].value !== holder[4].value){
-    //   console.log('No Pair')
-    // }
   } catch (error) {
     console.log('there is a problem getting all cards', error)
   }
