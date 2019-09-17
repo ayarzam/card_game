@@ -32,7 +32,7 @@ Include some tests that validate the portion of your code that identifies the hi
 
 3.  Run node:
 
-        node app.js
+        server app.js
         
 4.  Navigate to http://localhost:3000.
 
